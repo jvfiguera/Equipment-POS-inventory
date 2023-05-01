@@ -34,11 +34,6 @@ def fn_check_user_exist(p_userid):
     '''Function to check if the user exist'''
     return Users.query.get(p_userid)
 
-    # if Users.query.get(p_userid):
-    #     return True
-    # else :
-    #     return False
-
 def fn_register_new_user(p_new_user_dat):
     ''' Function to add new users'''
     db.session.add(p_new_user_dat)
