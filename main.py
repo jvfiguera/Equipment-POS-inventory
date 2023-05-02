@@ -61,65 +61,61 @@ def fn_home():
                                ,form        =form_login
                                )
     else :
-        if ctl_flg_glb == 0 :
-            if form_login.validate_on_submit():
-                chk_user_exist = fn_check_user_exist(p_userid=form_login.email_user.data)
+        if not form_register.cancel.data :
+            if ctl_flg_glb == 0 :
+                if form_login.validate_on_submit():
+                    chk_user_exist = fn_check_user_exist(p_userid=form_login.email_user.data)
 
-                if chk_user_exist:
-                    if check_password_hash(pwhash=chk_user_exist.password, password=form_login.password_user.data):
-                        login_user(chk_user_exist, remember=True)
-                        flask.flash("Usuario autenticado de forma correcta en la plataforma")
+                    if chk_user_exist:
+                        if check_password_hash(pwhash=chk_user_exist.password, password=form_login.password_user.data):
+                            login_user(chk_user_exist, remember=True)
+                            flask.flash("Usuario autenticado de forma correcta en la plataforma")
+                        else:
+                            flask.flash("Invalida contraseña , por favor intente de nuevo")
+                        return redirect(location=url_for("fn_home"))
                     else:
-                        flask.flash("Invalida contraseña , por favor intente de nuevo")
+                        ctl_flg_glb = 1
+                        flask.flash("Disculpe usuario NO registrado en la plataforma, resgistrese")
+                        return render_template(template_name_or_list='login.html'
+                                               , form=form_register
+                                               )
+                else:
+                    ctl_flg_glb = 0
                     return redirect(location=url_for("fn_home"))
+            if ctl_flg_glb == 1:
+                if form_register.validate_on_submit():
+                    chk_user_exist = fn_check_user_exist(p_userid=form_login.email_user.data)
+                    if not chk_user_exist:
+                        new_user_dat =Users(email_user =form_register.email_user.data
+                                           ,first_name =form_register.first_name.data
+                                           ,last_name  =form_register.last_name.data
+                                           ,password   =generate_password_hash(password=form_register.password_user.data, method = 'pbkdf2:sha256',salt_length=8)
+                                          )
+                        fn_register_new_user(p_new_user_dat=new_user_dat)
+                        ctl_flg_glb = 0
+                        return render_template(template_name_or_list='login.html'
+                                               , form=form_login
+                                               )
+                    else :
+                        ctl_flg_glb = 1
+                        flask.flash("Usuario ya existe, por favor intente con otro correo o identificador")
+                        return render_template(template_name_or_list='login.html'
+                                               , form=form_register
+                                               )
                 else:
                     ctl_flg_glb = 1
-                    flask.flash("Disculpe usuario NO registrado en la plataforma, resgistrese")
                     return render_template(template_name_or_list='login.html'
                                            , form=form_register
                                            )
-            else:
-                ctl_flg_glb = 0
-                return redirect(location=url_for("fn_home"))
-        if ctl_flg_glb == 1:
-            if form_register.validate_on_submit():
-                chk_user_exist = fn_check_user_exist(p_userid=form_login.email_user.data)
-                if not chk_user_exist:
-                    new_user_dat =Users(email_user =form_register.email_user.data
-                                       ,first_name =form_register.first_name.data
-                                       ,last_name  =form_register.last_name.data
-                                       ,password   =generate_password_hash(password=form_register.password_user.data, method = 'pbkdf2:sha256',salt_length=8)
-                                      )
-                    fn_register_new_user(p_new_user_dat=new_user_dat)
-                    ctl_flg_glb = 0
-                    return render_template(template_name_or_list='login.html'
-                                           , form=form_login
-                                           )
-                else :
-                    ctl_flg_glb = 1
-                    flask.flash("Usuario ya existe, por favor intente con otro correo o identificador")
-                    return render_template(template_name_or_list='login.html'
-                                           , form=form_register
-                                           )
-            else:
-                ctl_flg_glb = 1
-                return render_template(template_name_or_list='login.html'
-                                       , form=form_register
+        else :
+            return render_template(template_name_or_list='login.html'
+                                       , form=form_login
                                        )
 
 
 @login_manager.user_loader
 def fn_load_user(user_id):
-    return Users.query.get(user_id)
-
-# @app.route('/fn_login',methods=['POST'])
-# def fn_login():
-#     if request.method == 'POST':
-#         email_user      = request.form.get(email)
-#         password_user   = request.form.get(password)
-#         print(email_user)
-#         print(password_user)
-#     return render_template(template_name_or_list='login.html')
+    return Users.query.get(user_id )
 
 if __name__ =='__main__':
     app.run(debug=True,port=5001)
