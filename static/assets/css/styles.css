@@ -1,0 +1,19 @@
+.btn_bar {
+    height: 35px;
+    width: 65px;
+    position: relative;
+    left: 150px;
+    top : 7px;
+}
+
+.first_row{
+height: fit-content;
+margin-right: -14px;
+border-bottom: solid;
+border-top: solid;
+border-width: thin;
+border-color: lightslategrey;
+}
+.inv_system{
+    font-family: Foldit;
+}

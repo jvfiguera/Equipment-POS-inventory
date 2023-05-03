@@ -70,9 +70,11 @@ def fn_home():
                         if check_password_hash(pwhash=chk_user_exist.password, password=form_login.password_user.data):
                             login_user(chk_user_exist, remember=True)
                             flask.flash("Usuario autenticado de forma correcta en la plataforma")
+                            return render_template(template_name_or_list='index.html'
+                                                   )
                         else:
                             flask.flash("Invalida contraseña , por favor intente de nuevo")
-                        return redirect(location=url_for("fn_home"))
+                            return redirect(location=url_for("fn_home"))
                     else:
                         ctl_flg_glb = 1
                         flask.flash("Disculpe usuario NO registrado en la plataforma, resgistrese")
@@ -112,6 +114,13 @@ def fn_home():
                                        , form=form_login
                                        )
 
+@app.route('/fn_logout',methods=['GET','POST'])
+def fn_logout():
+    form_login = LoginForm()
+    logout_user()
+    return render_template(template_name_or_list='login.html'
+                           , form=form_login
+                           )
 
 @login_manager.user_loader
 def fn_load_user(user_id):
