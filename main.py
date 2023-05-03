@@ -110,17 +110,12 @@ def fn_home():
                                            , form=form_register
                                            )
         else :
-            return render_template(template_name_or_list='login.html'
-                                       , form=form_login
-                                       )
+            return redirect(location=url_for("fn_home"))
 
 @app.route('/fn_logout',methods=['GET','POST'])
 def fn_logout():
-    form_login = LoginForm()
     logout_user()
-    return render_template(template_name_or_list='login.html'
-                           , form=form_login
-                           )
+    return redirect(location=url_for("fn_home"))
 
 @login_manager.user_loader
 def fn_load_user(user_id):

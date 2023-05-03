@@ -21,15 +21,33 @@
 		<link href="https://fonts.googleapis.com/css2?family=Foldit&display=swap" rel="stylesheet">
 	</head>
 	<body class="is-preload">
-
-		<!-- Header -->
-<!--			<header id="header">-->
-<!--				<h1>Exploring the Store</h1>-->
-<!--				<p>Introduzca su email y password <br />-->
-<!--				para conectar al sistema. Done by <a href="http://html5up.net">HTML5 UP</a>.</p>-->
-<!--			</header>-->
-		<!-- Skeletor HTML -->
+		<!-- Inicio Skeletor HTML -->
 		<div class="container text-center" style="width: 1236px; position: relative; top: -80px;">
+		<div class="row first_row" style="height: 5rem; margin-right: -14px; width: 95%;">
+				<div class="row justify-content-md-center" style="width: 1236px;margin-left:-1px; height: 100%;">
+					<div class="col col-lg-2 inv_system">
+					   <h1 class="h1-class-inv">
+						  INVENTORY SYSTEM
+					  </h1>
+					</div>
+					<div class="col-md-auto" style="height: 73%; border-left: solid;border-width: thin; border-color: lightslategrey; width: 30%; position: absolute;left: 68%;top: 2%;">
+					  <a class="btn btn-dark float-right btn_bar" href="{{ url_for('fn_logout') }}">Logout</a>
+					</div>
+				</div>
+		</div>
+			<div class="row second_row">
+				<div class="row justify-content-md-center" style="width: 1236px;margin-left:-1px;">
+					<div class="col col-lg-2">
+					  1 of 3
+					</div>
+					<div class="col-md-auto">
+					  Variable width content
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--<div class="container text-center" style="width: 1236px; position: relative; top: -80px;">
 			<div class="row first_row" style="height: 60px; margin-right: -14px;">
 				<div class="inv_system" style="width: 700px; height: 50px;position: absolute; top: 5px;">
 					  <h1>
@@ -37,7 +55,7 @@
 					  </h1>
 				</div>
 				<div style="width: 400px; height: 50px; border-left: solid;border-width: thin; border-color: lightslategrey; position: absolute;left: 835px;top: 5px;">
-					<a class="btn btn-dark float-right btn_bar" href="{{ url_for('fn_home') }}">Logout</a>
+					<a class="btn btn-dark float-right btn_bar" href="{{ url_for('fn_logout') }}">Logout</a>
 				</div>
 
 			</div>
@@ -51,9 +69,9 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div>-->
 
-
+		<!-- Fin Skeletor HTML -->
 
 		<!-- Footer -->
 			<footer id="footer">
