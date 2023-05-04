@@ -14,19 +14,29 @@ border-top: solid;
 border-width: thin;
 border-color: lightslategrey;
 }
+
 .inv_system{
-    font-family: Foldit;
     width: 65%;
     height: 100%;
 }
 
 .h1-class-inv{
+    font-family: Foldit;
+    font-size: 200%;
     line-height: 2em;
     margin: 0;
     width: 100%;
     height: 100%;
 }
+
 .row{
  margin-right :0;
  margin-left  :0;
+}
+
+.second_row{
+    height: 1000px;
+}
+.div-col-menu{
+border-right: 6px solid #1A1A40;
 }
