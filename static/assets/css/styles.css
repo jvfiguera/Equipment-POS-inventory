@@ -7,12 +7,12 @@
 }
 
 .first_row{
-height: fit-content;
-margin-right: -14px;
-border-bottom: solid;
-border-top: solid;
-border-width: thin;
-border-color: lightslategrey;
+    height: fit-content;
+    margin-right: -14px;
+    border-bottom: solid;
+    border-top: solid;
+    border-width: thin;
+    border-color: lightslategrey;
 }
 
 .inv_system{
@@ -36,7 +36,26 @@ border-color: lightslategrey;
 
 .second_row{
     height: 1000px;
+   /* overflow-y: scroll;
+    overflow-x: hidden;*/
 }
+
 .div-col-menu{
-border-right: 6px solid #1A1A40;
+    border-right: 6px solid #D14D72;
+    position: relative;
+    top: 60px;
+}
+
+.dropdown-menu {
+    background-color: #b1aaaa;
+}
+
+a{
+    -moz-transition: border-bottom-color 0.2s ease, color 0.2s ease;
+    -webkit-transition: border-bottom-color 0.2s ease, color 0.2s ease;
+    -ms-transition: border-bottom-color 0.2s ease, color 0.2s ease;
+    transition: border-bottom-color 0.2s ease, color 0.2s ease;
+    border-bottom: dotted 1px rgba(255, 255, 255, 0.25);
+    color: #3A98B9;
+    text-decoration: none;
 }

@@ -3,7 +3,7 @@ from flask import Flask, render_template,redirect,url_for, flash, request
 from flask_login import UserMixin,login_user,LoginManager,current_user,logout_user
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-from forms import LoginForm, RegisterForm
+from forms import LoginForm, RegisterForm, RegisterNewEqp,marca_eqp_list,model_eqp_list,status_eqp_list
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -21,15 +21,89 @@ ctl_flg_glb =0
 
 class Users(db.Model,UserMixin):
     __tablename__ ="users"
-    email_user  =db.Column(db.String(50) , primary_key = True)
-    first_name     =db.Column(db.String(100), nullable = False)
-    last_name      =db.Column(db.String(100), nullable = False)
-    password       =db.Column(db.String(100), nullable = False)
+    email_user      =db.Column(db.String(50) , primary_key = True)
+    first_name      =db.Column(db.String(100), nullable = False)
+    last_name       =db.Column(db.String(100), nullable = False)
+    password        =db.Column(db.String(100), nullable = False)
 
     def get_id(self):
         return (self.email_user)
 
-# Funciones generales del aplcativo
+class MarcaEqp(db.Model,UserMixin):
+    __tablename__ ="marca_eqp"
+    id_marca     =db.Column(db.Integer , primary_key = True)
+    desc_marca   =db.Column(db.String(30), nullable = False)
+
+class ModelEqp(db.Model,UserMixin):
+    __tablename__ ="model_eqp"
+    id_model     =db.Column(db.Integer , primary_key = True)
+    desc_model   =db.Column(db.String(30), nullable = False)
+
+class StatusEqp(db.Model,UserMixin):
+    __tablename__ ="status_eqp"
+    id_status     =db.Column(db.Integer , primary_key = True)
+    desc_status   =db.Column(db.String(30), nullable = False)
+
+class InventoryEqp(db.Model,UserMixin):
+    __tablename__ ="inventory_eqp"
+    serial_number =db.Column(db.String(30), primary_key = True,nullable = False)
+    store_id      =db.Column(db.String(10) , nullable = False)
+    id_marca      =db.Column(db.Integer, nullable=False)
+    id_model      =db.Column(db.Integer, nullable=False)
+    id_status     =db.Column(db.Integer, nullable=False)
+
+class InventoryEqp_vw(db.Model,UserMixin):
+    __tablename__ ="inventory_eqp_vw"
+    serial_number =db.Column(db.String(30), primary_key = True,nullable = False)
+    store_id      =db.Column(db.String(10) , nullable = False)
+    desc_store    =db.Column(db.String(30), nullable=False)
+    desc_marca    =db.Column(db.String(30), nullable=False)
+    desc_model    =db.Column(db.String(30), nullable=False)
+    desc_status   =db.Column(db.String(30), nullable=False)
+
+# Funciones generales del aplicativo
+
+def fn_get_all_inveqp():
+    '''Función que retorna el listado del inventario de equipos'''
+    return InventoryEqp_vw.query.all()
+
+def fn_chk_eqp_exist(p_serial_number):
+    '''Function to check if the equipment exist'''
+    if InventoryEqp.query.get(p_serial_number):
+        return True
+    else:
+        return False
+
+def fn_add_inv_neweqp(p_new_inveqp):
+    '''Function to add new inentory equipment'''
+    if not fn_chk_eqp_exist(p_serial_number=p_new_inveqp.serial_number):
+        db.session.add(p_new_inveqp)
+        db.session.commit()
+        return True
+    else :
+        return False
+
+def fn_get_all_marcaeqp():
+    '''Function to get list mark'''
+    marca_eqp_list.clear()
+    all_marca_eqp = MarcaEqp.query.all()
+    for i in range(len(all_marca_eqp)):
+        marca_eqp_list.append((all_marca_eqp[i].id_marca,all_marca_eqp[i].desc_marca))
+
+def fn_get_all_modeleqp():
+    '''Function to get List model'''
+    model_eqp_list.clear()
+    all_model_eqp = ModelEqp.query.all()
+    for i in range(len(all_model_eqp)):
+        model_eqp_list.append((all_model_eqp[i].id_model,all_model_eqp[i].desc_model))
+
+def fn_get_all_statuseqp():
+    '''Function to get List Status'''
+    status_eqp_list.clear()
+    all_status_eqp = StatusEqp.query.all()
+    for i in range(len(all_status_eqp)):
+        status_eqp_list.append((all_status_eqp[i].id_status,all_status_eqp[i].desc_status))
+
 def fn_check_user_exist(p_userid):
     '''Function to check if the user exist'''
     return Users.query.get(p_userid)
@@ -71,6 +145,7 @@ def fn_home():
                             login_user(chk_user_exist, remember=True)
                             flask.flash("Usuario autenticado de forma correcta en la plataforma")
                             return render_template(template_name_or_list='index.html'
+                                                   ,flg             =1
                                                    )
                         else:
                             flask.flash("Invalida contraseña , por favor intente de nuevo")
@@ -120,6 +195,52 @@ def fn_logout():
 @login_manager.user_loader
 def fn_load_user(user_id):
     return Users.query.get(user_id )
+
+# Funciones para el procesamiento del inventario
+# de Equipos
+@app.route('/fn_register_neweqp',methods=['GET','POST'])
+def fn_register_neweqp():
+    fn_get_all_marcaeqp()
+    fn_get_all_modeleqp()
+    fn_get_all_statuseqp()
+    form_reg_eqp = RegisterNewEqp()
+    print(request.method)
+    if request.method == 'GET':
+        return render_template(template_name_or_list='index.html'
+                               ,flg             =2
+                               ,title_form      ='Registro de Nuevos Equipos'
+                               ,form=form_reg_eqp
+                               )
+    else:
+            if form_reg_eqp.validate_on_submit():
+                new_inveqp_data  =InventoryEqp(serial_number    =form_reg_eqp.serial_number.data
+                                               ,store_id        =form_reg_eqp.store_id.data
+                                               ,id_marca        =form_reg_eqp.marca_eqp.data
+                                               ,id_model        =form_reg_eqp.model_eqp.data
+                                               ,id_status       =form_reg_eqp.status_eqp.data
+                                            )
+                if fn_add_inv_neweqp(p_new_inveqp=new_inveqp_data):
+                    flask.flash("El equipo ha sido registrado de manera correcta")
+                else:
+                    flask.flash("El equipo ya esta registrado en el inventario")
+
+            return render_template(template_name_or_list='index.html'
+                                   , flg=2
+                                   , title_form='Registro de Nuevos Equipos'
+                                   , form=form_reg_eqp
+                                   )
+
+                #return redirect(location=url_for("fn_register_neweqp"))
+@app.route('/fn_get_show_inveqp',methods=['GET','POST'])
+def fn_get_show_inveqp():
+    tbl_all_inventory_eqp_list = fn_get_all_inveqp()
+    tbl_header_list =('Nro. Serial','Stored Id','Store name','Marca','Modelo','Status')
+    return render_template(template_name_or_list   ='index.html'
+                           ,flg                    =3
+                           ,title_form             ='Tabla inventario de Equipos'
+                           ,tbl_header_list_web    =tbl_header_list
+                           ,tbl_inventory_eqp_list = tbl_all_inventory_eqp_list
+                           )
 
 if __name__ =='__main__':
     app.run(debug=True,port=5001)
