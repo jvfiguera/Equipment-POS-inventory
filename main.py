@@ -3,7 +3,7 @@ from flask import Flask, render_template,redirect,url_for, flash, request
 from flask_login import UserMixin,login_user,LoginManager,current_user,logout_user
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-from forms import LoginForm, RegisterForm, RegisterNewEqp,marca_eqp_list,model_eqp_list,status_eqp_list
+from forms import LoginForm, RegisterForm, RegisterNewEqp,marca_eqp_list,model_eqp_list,status_eqp_list,FilterTblEqp
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -57,15 +57,42 @@ class InventoryEqp_vw(db.Model,UserMixin):
     serial_number =db.Column(db.String(30), primary_key = True,nullable = False)
     store_id      =db.Column(db.String(10) , nullable = False)
     desc_store    =db.Column(db.String(30), nullable=False)
+    id_marca      =db.Column(db.Integer, nullable=False)
     desc_marca    =db.Column(db.String(30), nullable=False)
+    id_model      =db.Column(db.Integer, nullable=False)
     desc_model    =db.Column(db.String(30), nullable=False)
+    id_status     =db.Column(db.Integer, nullable=False)
     desc_status   =db.Column(db.String(30), nullable=False)
 
 # Funciones generales del aplicativo
 
-def fn_get_all_inveqp():
+def fn_get_all_inveqp(p_filter,p_filter_data):
     '''Función que retorna el listado del inventario de equipos'''
-    return InventoryEqp_vw.query.all()
+    if p_filter == 0 :
+        return InventoryEqp_vw.query.all()
+    else :
+        if p_filter_data[0] !=0 and p_filter_data[1] !=0 and p_filter_data[2] !=0: # Marca, Model, Status
+            print('Marca,Modelo,Status')
+            return  InventoryEqp_vw.query.filter(InventoryEqp_vw.id_marca==p_filter_data[0],InventoryEqp_vw.id_model==p_filter_data[1],InventoryEqp_vw.id_status==p_filter_data[2]).all()
+        elif p_filter_data[0] !=0 and p_filter_data[1] !=0 and p_filter_data[2] ==0: # Marca , Modelo
+            print('Marca,Modelo')
+            return  InventoryEqp_vw.query.filter(InventoryEqp_vw.id_marca==p_filter_data[0],InventoryEqp_vw.id_model==p_filter_data[1]).all()
+        elif p_filter_data[0] !=0 and p_filter_data[1] ==0 and p_filter_data[2] !=0: # Marca , Status
+            print('Marca,Status')
+            return  InventoryEqp_vw.query.filter(InventoryEqp_vw.id_marca==p_filter_data[0],InventoryEqp_vw.id_status==p_filter_data[2]).all()
+        elif p_filter_data[0] ==0 and p_filter_data[1] !=0 and p_filter_data[2] !=0: # Model, Status
+            print('Modelo,Status')
+            return InventoryEqp_vw.query.filter(InventoryEqp_vw.id_model==p_filter_data[1],InventoryEqp_vw.id_status==p_filter_data[2]).all()
+        elif p_filter_data[0] !=0 and p_filter_data[1] ==0 and p_filter_data[2] ==0: # Marca
+            print('Marca')
+            print(p_filter_data)
+            return  InventoryEqp_vw.query.filter(InventoryEqp_vw.id_marca==p_filter_data[0]).all()
+        elif  p_filter_data[0] ==0 and p_filter_data[1] !=0 and p_filter_data[2] ==0: # Modelo
+            print('Modelo')
+            return InventoryEqp_vw.query.filter(InventoryEqp_vw.id_model==p_filter_data[1]).all()
+        else : # Status
+            print('Status')
+            return InventoryEqp_vw.query.filter(InventoryEqp_vw.id_status==p_filter_data[2]).all()
 
 def fn_chk_eqp_exist(p_serial_number):
     '''Function to check if the equipment exist'''
@@ -83,24 +110,30 @@ def fn_add_inv_neweqp(p_new_inveqp):
     else :
         return False
 
-def fn_get_all_marcaeqp():
+def fn_get_all_marcaeqp(p_filter):
     '''Function to get list mark'''
     marca_eqp_list.clear()
     all_marca_eqp = MarcaEqp.query.all()
+    if p_filter ==1 :
+        marca_eqp_list.append((0,'Todas las marcas'))
     for i in range(len(all_marca_eqp)):
         marca_eqp_list.append((all_marca_eqp[i].id_marca,all_marca_eqp[i].desc_marca))
 
-def fn_get_all_modeleqp():
+def fn_get_all_modeleqp(p_filter):
     '''Function to get List model'''
     model_eqp_list.clear()
     all_model_eqp = ModelEqp.query.all()
+    if p_filter ==1 :
+        model_eqp_list.append((0,'Todos los modelos'))
     for i in range(len(all_model_eqp)):
         model_eqp_list.append((all_model_eqp[i].id_model,all_model_eqp[i].desc_model))
 
-def fn_get_all_statuseqp():
+def fn_get_all_statuseqp(p_filter):
     '''Function to get List Status'''
     status_eqp_list.clear()
     all_status_eqp = StatusEqp.query.all()
+    if p_filter ==1 :
+        status_eqp_list.append((0,'Todos los status'))
     for i in range(len(all_status_eqp)):
         status_eqp_list.append((all_status_eqp[i].id_status,all_status_eqp[i].desc_status))
 
@@ -143,7 +176,7 @@ def fn_home():
                     if chk_user_exist:
                         if check_password_hash(pwhash=chk_user_exist.password, password=form_login.password_user.data):
                             login_user(chk_user_exist, remember=True)
-                            flask.flash("Usuario autenticado de forma correcta en la plataforma")
+                            #flask.flash("Usuario autenticado de forma correcta en la plataforma")
                             return render_template(template_name_or_list='index.html'
                                                    ,flg             =1
                                                    )
@@ -200,9 +233,9 @@ def fn_load_user(user_id):
 # de Equipos
 @app.route('/fn_register_neweqp',methods=['GET','POST'])
 def fn_register_neweqp():
-    fn_get_all_marcaeqp()
-    fn_get_all_modeleqp()
-    fn_get_all_statuseqp()
+    fn_get_all_marcaeqp(p_filter=0)
+    fn_get_all_modeleqp(p_filter=0)
+    fn_get_all_statuseqp(p_filter=0)
     form_reg_eqp = RegisterNewEqp()
     print(request.method)
     if request.method == 'GET':
@@ -233,13 +266,27 @@ def fn_register_neweqp():
                 #return redirect(location=url_for("fn_register_neweqp"))
 @app.route('/fn_get_show_inveqp',methods=['GET','POST'])
 def fn_get_show_inveqp():
-    tbl_all_inventory_eqp_list = fn_get_all_inveqp()
+    fn_get_all_marcaeqp(p_filter=1)
+    fn_get_all_modeleqp(p_filter=1)
+    fn_get_all_statuseqp(p_filter=1)
+    form_filter =FilterTblEqp()
     tbl_header_list =('Nro. Serial','Stored Id','Store name','Marca','Modelo','Status')
+    print(request.method)
+    if request.method == 'GET':
+        tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0,p_filter_data=(0,0,0))
+    else:
+        filter_data =(int(form_filter.marca_eqp.data),int(form_filter.model_eqp.data),int(form_filter.status_eqp.data))
+        if filter_data ==(0,0,0) :
+            tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0, p_filter_data=filter_data)
+        else:
+            tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=1,p_filter_data=filter_data)
+
     return render_template(template_name_or_list   ='index.html'
                            ,flg                    =3
                            ,title_form             ='Tabla inventario de Equipos'
                            ,tbl_header_list_web    =tbl_header_list
-                           ,tbl_inventory_eqp_list = tbl_all_inventory_eqp_list
+                           ,tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
+                           ,form                   =form_filter
                            )
 
 if __name__ =='__main__':

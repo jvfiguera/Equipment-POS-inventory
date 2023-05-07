@@ -29,3 +29,9 @@ class RegisterNewEqp(FlaskForm):
     status_eqp      = SelectField('Estatus del equipo:',[DataRequired(),input_required()],coerce=str, choices=status_eqp_list)
     submit          = SubmitField('Registrar')
     cancel          = SubmitField('Cancel')
+
+class FilterTblEqp(FlaskForm):
+    marca_eqp       = SelectField('Marca del equipo:',[DataRequired(),input_required(),length(min=5, max=5)],coerce=str, choices=marca_eqp_list)
+    model_eqp       = SelectField('Modelo del equipo:',[DataRequired(),input_required()],coerce=str, choices=model_eqp_list)
+    status_eqp      = SelectField('Estatus del equipo:',[DataRequired(),input_required()],coerce=str, choices=status_eqp_list)
+    submit          = SubmitField('Consultar')

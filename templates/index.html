@@ -80,6 +80,10 @@
 								{% endif %}
 							{% if flg ==3: %}
 								<div class="row" style="color: lightseagreen;">
+									<h1> Filters</h1>
+									<div class="row" style="color: lightseagreen; max-width: 25%;">
+											{{wtf.quick_form(form, novalidate=True)}}
+									</div>
 									<table class="table table-hover">
 										  <thead style="color: white;font-weight: lighter;">
 											<tr>
