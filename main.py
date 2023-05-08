@@ -271,7 +271,6 @@ def fn_get_show_inveqp():
     fn_get_all_statuseqp(p_filter=1)
     form_filter =FilterTblEqp()
     tbl_header_list =('Nro. Serial','Stored Id','Store name','Marca','Modelo','Status')
-    print(request.method)
     if request.method == 'GET':
         tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0,p_filter_data=(0,0,0))
     else:
@@ -283,7 +282,7 @@ def fn_get_show_inveqp():
 
     return render_template(template_name_or_list   ='index.html'
                            ,flg                    =3
-                           ,title_form             ='Tabla inventario de Equipos'
+                           ,title_form             ='Tabla Inventario de Equipos'
                            ,tbl_header_list_web    =tbl_header_list
                            ,tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
                            ,form                   =form_filter
