@@ -1,9 +1,13 @@
+.home{
+    display : flex;
+    flex-wrap : wrap;
+}
 .btn_bar {
     height: 35px;
     width: 65px;
     position: relative;
     left: 15%;
-    top : 25%;
+    bottom: 75%;
 }
 
 .first_row{
@@ -15,9 +19,27 @@
     border-color: lightslategrey;
 }
 
-.inv_system{
+.row-1ra-col1{
+   /* border-right: solid;
+    border-width: thin;
+    border-color: lightslategrey;*/
     width: 65%;
     height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.row-1ra-col2{
+    border-left: solid;
+    border-width: thin;
+    border-color: lightslategrey;
+    padding: 0;
+    margin: 0;
+    width: 30%;
+    position: relative;
+    left: 68%;
+    height: 100%;
+    /*border : double;*/
 }
 
 .h1-class-inv{
@@ -35,31 +57,30 @@
 }
 
 .second_row{
-    /*height: 1000px;*/
+    min-width: 750px;
+    min-height: 250px;
     position: relative;
     top: 20px;
     /*border: double;
     border-color: red;*/
-   /* overflow-y: scroll;
+/*    overflow-y: scroll;
     overflow-x: hidden;*/
 }
 
 .row2da-col-1ra{
-/*border: double;*/
 min-width: 22%;
 position: absolute;
 top : 15%;
 }
 
 .row2da-col-2da{
- /*border: double;*/
  position: relative;
      left: 22%;
 max-width: 78%;
 }
 
 .row2da-filters {
-width: 25%;
+width: 35%;
 position: relative;
 left: 10%;
 text-align: left;
@@ -87,4 +108,45 @@ a{
     border-bottom: dotted 1px rgba(255, 255, 255, 0.25);
     color: #3A98B9;
     text-decoration: none;
+}
+
+
+@media screen and (min-width:750px) and (max-width:1024px){
+    .row2da-col-1ra{
+        flex: 0 0 auto;
+        font-size: 40%;
+    }
+
+    .row2da-col-2da{
+        flex: 0 0 auto;
+        font-size: 40%;
+    }
+}
+
+@media screen and (min-width:480px) and (max-width:780px){
+  .row2da-col-1ra{
+        flex: 0 0 auto;
+        font-size: 40%;
+    }
+
+    .row2da-col-2da{
+        flex: 0 0 auto;
+        font-size: 40%;
+    }
+}
+
+@media screen and (max-width:480px){
+  .row2da-col-1ra{
+        flex: 0 0 auto;
+        font-size: 40%;
+    }
+
+    .row2da-col-2da{
+        flex: 0 0 auto;
+        font-size: 40%;
+    }
+    html,body{
+      overflow-y: scroll;
+      overflow-x: scroll;
+    }
 }

@@ -3,7 +3,7 @@ from flask import Flask, render_template,redirect,url_for, flash, request
 from flask_login import UserMixin,login_user,LoginManager,current_user,logout_user
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-from forms import LoginForm, RegisterForm, RegisterNewEqp,marca_eqp_list,model_eqp_list,status_eqp_list,FilterTblEqp
+from forms import LoginForm, RegisterForm, RegisterNewEqp,marca_eqp_list,model_eqp_list,status_eqp_list,FilterTblEqp,GetSerialEqp
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -65,6 +65,15 @@ class InventoryEqp_vw(db.Model,UserMixin):
     desc_status   =db.Column(db.String(30), nullable=False)
 
 # Funciones generales del aplicativo
+def fn_delete_eqpinc(p_serial_number):
+    #if fn_chk_eqp_exist(p_serial_number=p_serial_number):
+    eqp_to_delete = InventoryEqp.query.get(p_serial_number)
+    db.session.delete(eqp_to_delete)
+    db.session.commit()
+    return True
+
+def fn_get_info_eqp(p_serial_number):
+    return InventoryEqp_vw.query.filter(InventoryEqp_vw.serial_number==p_serial_number).all()
 
 def fn_get_all_inveqp(p_filter,p_filter_data):
     '''Función que retorna el listado del inventario de equipos'''
@@ -287,6 +296,51 @@ def fn_get_show_inveqp():
                            ,tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
                            ,form                   =form_filter
                            )
+
+@app.route('/fn_Del_Serialeqp',methods=['GET','POST'])
+def fn_DelEqpInv():
+    # fn_get_all_marcaeqp(p_filter=1)
+    # fn_get_all_modeleqp(p_filter=1)
+    # fn_get_all_statuseqp(p_filter=1)
+    form =GetSerialEqp()
+    tbl_header_list = ('Nro. Serial', 'Stored Id', 'Store name', 'Marca', 'Modelo', 'Status')
+    if request.method=='GET':
+        tbl_all_inventory_eqp_list = []
+        return render_template(template_name_or_list='index.html'
+                               , flg=4
+                               , title_form             ='Eliminar Equipo del Inventario'
+                               , tbl_header_list_web    =tbl_header_list
+                               , tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
+                               , form=form
+                               )
+    else :
+        if form.select.data and form.serial_number.data:
+            tbl_all_inventory_eqp_list = fn_get_info_eqp(p_serial_number=form.serial_number.data)
+            if tbl_all_inventory_eqp_list :
+                return render_template(template_name_or_list='index.html'
+                                       , flg=4
+                                       , title_form='Eliminar Equipo del Inventario'
+                                       , tbl_header_list_web=tbl_header_list
+                                       , tbl_inventory_eqp_list=tbl_all_inventory_eqp_list
+                                       , form=form
+                                       )
+            else :
+                flask.flash("El equipo no existe, por favor verifique")
+                return redirect(location=url_for("fn_DelEqpInv"))
+        elif form.select.data and not form.serial_number.data:
+            tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0, p_filter_data=(0, 0, 0))
+            return render_template(template_name_or_list='index.html'
+                                   , flg=4
+                                   , title_form='Eliminar Equipo del Inventario'
+                                   , tbl_header_list_web=tbl_header_list
+                                   , tbl_inventory_eqp_list=tbl_all_inventory_eqp_list
+                                   , form=form
+                                   )
+        else:
+            if form.delete.data and form.serial_number.data:
+                if fn_delete_eqpinc(form.serial_number.data):
+                    flask.flash("El equipo ha sido eliminado del inventario")
+            return redirect(location=url_for("fn_DelEqpInv"))
 
 if __name__ =='__main__':
     app.run(debug=True,port=5001)

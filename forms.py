@@ -35,3 +35,9 @@ class FilterTblEqp(FlaskForm):
     model_eqp       = SelectField('Modelo del equipo:',[DataRequired(),input_required()],coerce=str, choices=model_eqp_list)
     status_eqp      = SelectField('Estatus del equipo:',[DataRequired(),input_required()],coerce=str, choices=status_eqp_list)
     submit          = SubmitField('Consultar')
+
+class GetSerialEqp(FlaskForm):
+    serial_number   = StringField(name='Serial number :',render_kw={"placeholder": "Número de serial", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=20, max=20),input_required()])
+    select          = SubmitField('Consultar')
+    delete          = SubmitField('Eliminar')
+    cancel          = SubmitField('Cancelar')

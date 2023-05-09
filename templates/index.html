@@ -31,17 +31,21 @@
 
 	</head>
 	<body class="is-preload">
+		<section class="home">
 		<!-- Inicio Skeletor HTML  width: 1236px; -->
 		<div class="container text-center" style="position: relative; top: -80px; width: 100%">
 			<div class="row first_row" style="height: 5rem; margin-right: -14px; width: auto;">
 					<div class="row justify-content-md-center" style="width: auto;height: 100%;">
-						<div class="col col-lg-2 inv_system">
+						<div class="col col-lg-2 row-1ra-col1">
 						   <h1 class="h1-class-inv">
 							  INVENTORY SYSTEM
 						  </h1>
 						</div>
-						<div class="col-md-auto" style="border-left: solid;border-width: thin; border-color: lightslategrey; width: 30%; position: absolute;left: 68%;top: 1%; height: 5%;">
-						  <a class="btn btn-dark float-right btn_bar" href="{{ url_for('fn_logout') }}">Logout</a>
+						<!--<div class="col-md-auto row-1ra-col2" style="width: 30%; position: relative;left: 68%;bottom: 75%; height: 22%;">-->
+						<div class="col-md-auto row-1ra-col2">
+						  <!-- <div class="col row-1ra-col2" style="width: 30%; position: relative;left: 68%;bottom: 75%; height: 22%;">-->
+								<a class="btn btn-dark float-right btn_bar" href="{{ url_for('fn_logout') }}">Logout</a>
+						   <!--</div>-->
 						</div>
 					</div>
 			</div>
@@ -58,7 +62,7 @@
 								  <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
 									<li><a class="dropdown-item" href="{{ url_for('fn_register_neweqp') }}">Registro Nuevos Equipos</a></li>
 									<li><a class="dropdown-item" href="{{ url_for('fn_get_show_inveqp') }}">Tabla Inventario de Equipos</a></li>
-									<li><a class="dropdown-item" href="#">Eliminar Equipo del inventario</a></li>
+									<li><a class="dropdown-item" href="{{ url_for('fn_DelEqpInv') }}">Eliminar Equipo del inventario</a></li>
 								  </ul>
 							</div>
 							<div class="dropdown">
@@ -90,9 +94,18 @@
 												{{wtf.quick_form(form, novalidate=True)}}
 										</div>
 										{% endif %}
-									{% if flg ==3: %}
+									{% if flg ==3 or flg ==4: %}
 										<div class="row" >
-											<h1 style="text-align: initial; position: relative; left: 10%;"> Filters</h1>
+											{% if flg ==3%}
+												<h1 style="text-align: initial; position: relative; left: 10%;"> Filters</h1>
+											{% endif %}
+											{% with messages = get_flashed_messages() %}
+												{% if messages %}
+													{% for message in messages  %}
+														<p style="color: #D21312;"> {{ message }} </p>
+													{% endfor %}
+												{% endif %}
+											{% endwith %}
 											<div class="row row2da-filters">
 													{{wtf.quick_form(form, novalidate=True)}}
 											</div>
@@ -146,7 +159,7 @@
 
 		<!-- Scripts -->
 			<script src="/static/assets/js/main.js"></script>
-
+	</section>
 	</body>
 </html>
 {% endblock %}
