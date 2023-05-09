@@ -9,6 +9,14 @@
     left: 15%;
     bottom: 75%;
 }
+.c-welcome{
+position: relative;
+    left: 15%;
+    bottom: 100%;
+    padding: 0;
+    margin: 0;
+    height: 5px;
+}
 
 .first_row{
     height: fit-content;
@@ -78,7 +86,6 @@ top : 15%;
      left: 22%;
 max-width: 78%;
 }
-
 .row2da-filters {
 width: 35%;
 position: relative;

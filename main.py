@@ -18,6 +18,7 @@ app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///store.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
 db =SQLAlchemy(app)
 ctl_flg_glb =0
+email_user_glb=''
 
 class Users(db.Model,UserMixin):
     __tablename__ ="users"
@@ -168,7 +169,7 @@ def admin_only(f):
 
 @app.route('/',methods=['POST','GET'])
 def fn_home():
-    global ctl_flg_glb
+    global ctl_flg_glb,email_user_glb
     form_login      = LoginForm()
     form_register   = RegisterForm()
     if request.method   ==  'GET':
@@ -181,13 +182,14 @@ def fn_home():
             if ctl_flg_glb == 0 :
                 if form_login.validate_on_submit():
                     chk_user_exist = fn_check_user_exist(p_userid=form_login.email_user.data)
-
+                    email_user_glb=chk_user_exist.email_user
                     if chk_user_exist:
                         if check_password_hash(pwhash=chk_user_exist.password, password=form_login.password_user.data):
                             login_user(chk_user_exist, remember=True)
                             #flask.flash("Usuario autenticado de forma correcta en la plataforma")
                             return render_template(template_name_or_list='index.html'
                                                    ,flg             =1
+                                                   ,email_user      =email_user_glb
                                                    )
                         else:
                             flask.flash("Invalida contraseña , por favor intente de nuevo")
@@ -242,16 +244,18 @@ def fn_load_user(user_id):
 # de Equipos
 @app.route('/fn_register_neweqp',methods=['GET','POST'])
 def fn_register_neweqp():
+    global email_user_glb
     fn_get_all_marcaeqp(p_filter=0)
     fn_get_all_modeleqp(p_filter=0)
     fn_get_all_statuseqp(p_filter=0)
     form_reg_eqp = RegisterNewEqp()
-    print(request.method)
+
     if request.method == 'GET':
         return render_template(template_name_or_list='index.html'
                                ,flg             =2
                                ,title_form      ='Registro de Nuevos Equipos'
-                               ,form=form_reg_eqp
+                               ,form            =form_reg_eqp
+                               ,email_user      =email_user_glb
                                )
     else:
             if form_reg_eqp.validate_on_submit():
@@ -270,11 +274,13 @@ def fn_register_neweqp():
                                    , flg=2
                                    , title_form='Registro de Nuevos Equipos'
                                    , form=form_reg_eqp
+                                   , email_user=email_user_glb
                                    )
 
                 #return redirect(location=url_for("fn_register_neweqp"))
 @app.route('/fn_get_show_inveqp',methods=['GET','POST'])
 def fn_get_show_inveqp():
+    global email_user_glb
     fn_get_all_marcaeqp(p_filter=1)
     fn_get_all_modeleqp(p_filter=1)
     fn_get_all_statuseqp(p_filter=1)
@@ -295,6 +301,7 @@ def fn_get_show_inveqp():
                            ,tbl_header_list_web    =tbl_header_list
                            ,tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
                            ,form                   =form_filter
+                           ,email_user             =email_user_glb
                            )
 
 @app.route('/fn_Del_Serialeqp',methods=['GET','POST'])
@@ -302,39 +309,43 @@ def fn_DelEqpInv():
     # fn_get_all_marcaeqp(p_filter=1)
     # fn_get_all_modeleqp(p_filter=1)
     # fn_get_all_statuseqp(p_filter=1)
+    global email_user_glb
     form =GetSerialEqp()
     tbl_header_list = ('Nro. Serial', 'Stored Id', 'Store name', 'Marca', 'Modelo', 'Status')
     if request.method=='GET':
         tbl_all_inventory_eqp_list = []
-        return render_template(template_name_or_list='index.html'
-                               , flg=4
+        return render_template(template_name_or_list    ='index.html'
+                               , flg                    =4
                                , title_form             ='Eliminar Equipo del Inventario'
                                , tbl_header_list_web    =tbl_header_list
                                , tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
-                               , form=form
+                               , form                   =form
+                               , email_user             =email_user_glb
                                )
     else :
         if form.select.data and form.serial_number.data:
             tbl_all_inventory_eqp_list = fn_get_info_eqp(p_serial_number=form.serial_number.data)
             if tbl_all_inventory_eqp_list :
-                return render_template(template_name_or_list='index.html'
-                                       , flg=4
-                                       , title_form='Eliminar Equipo del Inventario'
-                                       , tbl_header_list_web=tbl_header_list
-                                       , tbl_inventory_eqp_list=tbl_all_inventory_eqp_list
-                                       , form=form
+                return render_template(template_name_or_list    ='index.html'
+                                       , flg                    =4
+                                       , title_form             ='Eliminar Equipo del Inventario'
+                                       , tbl_header_list_web    =tbl_header_list
+                                       , tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
+                                       , form                   =form
+                                       , email_user             =email_user_glb
                                        )
             else :
                 flask.flash("El equipo no existe, por favor verifique")
                 return redirect(location=url_for("fn_DelEqpInv"))
         elif form.select.data and not form.serial_number.data:
             tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0, p_filter_data=(0, 0, 0))
-            return render_template(template_name_or_list='index.html'
-                                   , flg=4
-                                   , title_form='Eliminar Equipo del Inventario'
-                                   , tbl_header_list_web=tbl_header_list
-                                   , tbl_inventory_eqp_list=tbl_all_inventory_eqp_list
-                                   , form=form
+            return render_template(template_name_or_list    ='index.html'
+                                   , flg                    =4
+                                   , title_form             ='Eliminar Equipo del Inventario'
+                                   , tbl_header_list_web    =tbl_header_list
+                                   , tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
+                                   , form                   =form
+                                   , email_user             =email_user_glb
                                    )
         else:
             if form.delete.data and form.serial_number.data:
