@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField,IntegerField,SubmitField,PasswordField,SelectField
+from wtforms import StringField,IntegerField,SubmitField,PasswordField,SelectField,Label
 from wtforms.validators import DataRequired,URL,length,input_required,equal_to
 
 # Definición de Listas
@@ -28,7 +28,7 @@ class RegisterNewEqp(FlaskForm):
     model_eqp       = SelectField('Modelo del equipo:',[DataRequired(),input_required()],coerce=str, choices=model_eqp_list)
     status_eqp      = SelectField('Estatus del equipo:',[DataRequired(),input_required()],coerce=str, choices=status_eqp_list)
     submit          = SubmitField('Registrar')
-    cancel          = SubmitField('Cancel')
+    #cancel          = SubmitField('Cancel')
 
 class FilterTblEqp(FlaskForm):
     marca_eqp       = SelectField('Marca del equipo:',[DataRequired(),input_required(),length(min=5, max=5)],coerce=str, choices=marca_eqp_list)
@@ -40,4 +40,8 @@ class GetSerialEqp(FlaskForm):
     serial_number   = StringField(name='Serial number :',render_kw={"placeholder": "Número de serial", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=20, max=20),input_required()])
     select          = SubmitField('Consultar')
     delete          = SubmitField('Eliminar')
+    #cancel          = SubmitField('Cancelar')
+
+class Confirmform(FlaskForm):
+    confirmar       = SubmitField('Confirmar')
     cancel          = SubmitField('Cancelar')

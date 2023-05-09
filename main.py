@@ -3,7 +3,7 @@ from flask import Flask, render_template,redirect,url_for, flash, request
 from flask_login import UserMixin,login_user,LoginManager,current_user,logout_user
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-from forms import LoginForm, RegisterForm, RegisterNewEqp,marca_eqp_list,model_eqp_list,status_eqp_list,FilterTblEqp,GetSerialEqp
+from forms import LoginForm, RegisterForm, RegisterNewEqp,marca_eqp_list,model_eqp_list,status_eqp_list,FilterTblEqp,GetSerialEqp,Confirmform
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -19,6 +19,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
 db =SQLAlchemy(app)
 ctl_flg_glb =0
 email_user_glb=''
+serial_number_glb=''
 
 class Users(db.Model,UserMixin):
     __tablename__ ="users"
@@ -182,8 +183,8 @@ def fn_home():
             if ctl_flg_glb == 0 :
                 if form_login.validate_on_submit():
                     chk_user_exist = fn_check_user_exist(p_userid=form_login.email_user.data)
-                    email_user_glb=chk_user_exist.email_user
                     if chk_user_exist:
+                        email_user_glb = chk_user_exist.email_user
                         if check_password_hash(pwhash=chk_user_exist.password, password=form_login.password_user.data):
                             login_user(chk_user_exist, remember=True)
                             #flask.flash("Usuario autenticado de forma correcta en la plataforma")
@@ -309,8 +310,9 @@ def fn_DelEqpInv():
     # fn_get_all_marcaeqp(p_filter=1)
     # fn_get_all_modeleqp(p_filter=1)
     # fn_get_all_statuseqp(p_filter=1)
-    global email_user_glb
+    global email_user_glb,serial_number_glb
     form =GetSerialEqp()
+    form_confirm = Confirmform()
     tbl_header_list = ('Nro. Serial', 'Stored Id', 'Store name', 'Marca', 'Modelo', 'Status')
     if request.method=='GET':
         tbl_all_inventory_eqp_list = []
@@ -347,11 +349,48 @@ def fn_DelEqpInv():
                                    , form                   =form
                                    , email_user             =email_user_glb
                                    )
+        elif form.delete.data and form.serial_number.data:
+                serial_number_glb=form.serial_number.data
+                return render_template(template_name_or_list='index.html'
+                                       , flg                =5
+                                       , title_form         ='Eliminar Equipo del Inventario'
+                                       , msg                ='Seguro desea eliminar el equipo: ' + form.serial_number.data + ' del inventario Si/No?'
+                                       , form               =form_confirm
+                                       , email_user         =email_user_glb
+                                       )
+        elif form_confirm.confirmar.data :
+            if fn_delete_eqpinc(p_serial_number=serial_number_glb):
+                flask.flash("El equipo ha sido eliminado del inventario")
+            else:
+                flask.flash("El equipo no pudo ser eliminado del inventario")
+            tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0, p_filter_data=(0, 0, 0))
+            return render_template(template_name_or_list    ='index.html'
+                                   , flg                    =4
+                                   , title_form             ='Eliminar Equipo del Inventario'
+                                   , tbl_header_list_web    =tbl_header_list
+                                   , tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
+                                   , form                   =form
+                                   , email_user             =email_user_glb
+                                   )
         else:
-            if form.delete.data and form.serial_number.data:
-                if fn_delete_eqpinc(form.serial_number.data):
-                    flask.flash("El equipo ha sido eliminado del inventario")
-            return redirect(location=url_for("fn_DelEqpInv"))
+                tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0, p_filter_data=(0, 0, 0))
+                return render_template(template_name_or_list    ='index.html'
+                                       , flg                    =4
+                                       , title_form             ='Eliminar Equipo del Inventario'
+                                       , tbl_header_list_web    =tbl_header_list
+                                       , tbl_inventory_eqp_list =tbl_all_inventory_eqp_list
+                                       , form                   =form
+                                       , email_user             =email_user_glb
+                                       )
+            # return redirect(location=url_for("fn_DelEqpInv"))
+
+@app.route('/fn_RegNewMerchant',methods=['GET','POST'])
+def fn_RegNewMerchant():
+    return render_template(template_name_or_list='index.html'
+                           , flg=5
+                           , title_form='Registro Merchants'
+                           , email_user=email_user_glb
+                           )
 
 if __name__ =='__main__':
     app.run(debug=True,port=5001)
