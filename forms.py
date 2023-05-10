@@ -6,6 +6,9 @@ from wtforms.validators import DataRequired,URL,length,input_required,equal_to
 marca_eqp_list =[]
 model_eqp_list =[]
 status_eqp_list =[]
+country_list =[]
+state_list =[]
+city_list =[]
 
 class LoginForm(FlaskForm):
     email_user      = StringField(name='Email Adress :',render_kw={"placeholder": "Email Address", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=20, max=30),input_required()])
@@ -45,3 +48,36 @@ class GetSerialEqp(FlaskForm):
 class Confirmform(FlaskForm):
     confirmar       = SubmitField('Confirmar')
     cancel          = SubmitField('Cancelar')
+
+class MerchantAddForm(FlaskForm):
+    id_merchant      = StringField('Id Merchant :',render_kw={"placeholder": "Id merchant", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=15, max=15),input_required()])
+    merchant_name    = StringField('Merchant name :',render_kw={"placeholder": "Merchant name", 'style': 'width: 30ch'},validators=[DataRequired(),length(min=5,max=100),input_required()])
+    merchant_address = StringField('Merchant address:', render_kw={"placeholder": "Merchan address", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=5, max=100), input_required()])
+    id_country       = SelectField('Merchant country:',[DataRequired(), input_required()], coerce=str,choices=country_list)
+    id_state         = SelectField('Merchant state:', [DataRequired(), input_required()], coerce=str,choices=state_list)
+    id_city          = SelectField('Merchant city:', [DataRequired(), input_required()], coerce=str,choices=city_list)
+    submit           = SubmitField('Register')
+
+    # @app.route('/dashboard/addname', methods=['GET', 'POST'])
+    # def addname():
+    #     form = AddName()
+    #     if form.validate_on_submit():
+    #         name = Name(form.name.data, form.groupID.data)
+    #         db.session.add(name)
+    #         db.session.commit()
+    #         return "New name added"
+
+#     < form
+#     method = "POST"
+#     action = "/dashboard/addname" >
+#     < h2 > Add
+#     name < / h2 >
+#     {{form.hidden_tag()}}
+#     {{wtf.form_field(form.name)}}
+#     {{wtf.form_field(form.groupID)}}
+#     < button
+#     type = "submit" > Add
+#     name < / button >
+#
+# < / form >
+

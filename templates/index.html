@@ -146,7 +146,18 @@
 											{{wtf.quick_form(form, novalidate=True)}}
 										</div>
 									{% endif %}
-							</div>
+									{% if flg ==6: %}
+											{% with messages = get_flashed_messages() %}
+												{% if messages %}
+													{% for message in messages  %}
+														<p style="color: #D21312;"> {{ message }} </p>
+													{% endfor %}
+												{% endif %}
+											{% endwith %}
+										<div class="row row2da-col2da-regneweqp">
+											{{wtf.quick_form(form, novalidate=True)}}
+										</div>
+									{% endif %}
 					</div>
 				  </div>
 				</div>
@@ -171,6 +182,59 @@
 		<!-- Scripts -->
 			<script src="/static/assets/js/main.js"></script>
 	</section>
+			<script>
+					country_select = document.getElementById('id_country');
+					state_select = document.getElementById('id_state')
+
+					country_select.onchange = function(){
+					id_country_w = country_select.value;
+					 <!-- alert(country); -->
+					 fetch('state/' + id_country_w).then(function(response){
+					  response.json().then(function(data) {
+					   optionHTML = '';
+					   for (state of data.statecountry) {
+						optionHTML += '<option value="' + state.id +'">' + state.name + '</option>'
+					   }
+						<!--					   alert(optionHTML)-->
+					   id_state.innerHTML = optionHTML;
+					  });
+					 });
+
+					id_country_w = country_select.value;
+					id_state_w   = state_select.value;
+					id_data_w = id_country_w.concat('|',id_state_w)
+					 <!-- alert(country); -->
+					 fetch('cities/' + id_data_w).then(function(response){
+					  response.json().then(function(data) {
+					   optionHTML = '';
+					   for (city of data.citiesbystate) {
+						optionHTML += '<option value="' + city.id +'">' + city.name + '</option>'
+					   }
+						<!--					   alert(optionHTML)-->
+					   id_city.innerHTML = optionHTML;
+					  });
+					 });
+					 
+					}
+
+					state_select.onchange = function(){
+					id_country_w = country_select.value;
+					id_state_w   = state_select.value;
+					id_data_w    = id_country_w.concat('|',id_state_w)
+					 <!-- alert(country); -->
+					 fetch('cities/' + id_data_w).then(function(response){
+					  response.json().then(function(data) {
+					   optionHTML = '';
+					   for (city of data.citiesbystate) {
+						optionHTML += '<option value="' + city.id +'">' + city.name + '</option>'
+					   }
+						<!--					   alert(optionHTML)-->
+					   id_city.innerHTML = optionHTML;
+					  });
+					 });
+					}
+			</script>
+
 	</body>
 </html>
 {% endblock %}
