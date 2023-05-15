@@ -58,6 +58,21 @@ class MerchantAddForm(FlaskForm):
     id_city          = SelectField('Merchant city:', [DataRequired(), input_required()], coerce=str,choices=city_list)
     submit           = SubmitField('Register')
 
+class MerchantMangeForm(FlaskForm):
+    id_merchant = StringField('Id Merchant :', render_kw={"placeholder": "Id merchant", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=15, max=15), input_required()])
+    merchant_name = StringField('Merchant name :',render_kw={"placeholder": "Merchant name", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=5, max=100), input_required()])
+    merchant_address = StringField('Merchant address:',render_kw={"placeholder": "Merchan address", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=5, max=100), input_required()])
+    id_country = SelectField('Merchant country:', [DataRequired(), input_required()], coerce=str,choices=country_list)
+    id_state = SelectField('Merchant state:', [DataRequired(), input_required()], coerce=str, choices=state_list)
+    id_city = SelectField('Merchant city:', [DataRequired(), input_required()], coerce=str, choices=city_list)
+    update = SubmitField('Update')
+    delete = SubmitField('Delete')
+    cancel = SubmitField('Cancel')
+
+class MerchantSelectform(FlaskForm):
+    id_merchant = StringField('Id Merchant :', render_kw={"placeholder": "Id merchant", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=15, max=15), input_required()])
+    submit = SubmitField('Select')
+
     # @app.route('/dashboard/addname', methods=['GET', 'POST'])
     # def addname():
     #     form = AddName()

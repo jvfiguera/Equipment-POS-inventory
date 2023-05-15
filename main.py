@@ -3,7 +3,7 @@ from flask import Flask, render_template,redirect,url_for, flash, request,jsonif
 from flask_login import UserMixin,login_user,LoginManager,current_user,logout_user
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-from forms import LoginForm, RegisterForm, RegisterNewEqp,FilterTblEqp,GetSerialEqp,Confirmform,MerchantAddForm
+from forms import LoginForm, RegisterForm, RegisterNewEqp,FilterTblEqp,GetSerialEqp,Confirmform,MerchantAddForm,MerchantMangeForm,MerchantSelectform
 from forms import marca_eqp_list,model_eqp_list,status_eqp_list, country_list,state_list,city_list
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -21,6 +21,7 @@ db =SQLAlchemy(app)
 ctl_flg_glb =0
 email_user_glb=''
 serial_number_glb=''
+merchant_data_glb=[]
 
 class Users(db.Model,UserMixin):
     __tablename__ ="users"
@@ -95,6 +96,43 @@ class Merchant(db.Model, UserMixin):
     id_city          = db.Column(db.Integer, primary_key=False)
 
 # Funciones generales del aplicativo
+def fn_update_merchant(p_update_merchant):
+    global merchant_data_glb
+    #if fn_chk_merchant_exist(p_id_merchant=p_update_merchant.id_merchant,p_merchant_name=p_update_merchant.merchant_name):
+    merchant_data_glb = Merchant.query.get(p_update_merchant.id_merchant)
+    print(p_update_merchant.id_merchant,p_update_merchant.merchant_name)
+    if merchant_data_glb :
+       merchant_data_glb.merchant_name     =p_update_merchant.merchant_name
+       merchant_data_glb.merchant_address  =p_update_merchant.merchant_address
+       merchant_data_glb.id_country        =p_update_merchant.id_country
+       merchant_data_glb.id_state          =p_update_merchant.id_state
+       merchant_data_glb.id_city           =p_update_merchant.id_city
+       db.session.commit()
+       return True
+    else:
+        return False
+    #else :
+        #return False
+
+def fn_delete_merchant(p_id_merchant,p_merchant_name):
+    global merchant_data_glb
+    if fn_chk_merchant_exist(p_id_merchant=p_id_merchant,p_merchant_name=p_merchant_name):
+        merchant_data_glb = Merchant.query.get(p_id_merchant)
+        if merchant_data_glb :
+            db.session.delete(merchant_data_glb)
+            db.session.commit()
+            return True
+    else :
+        return False
+
+def fn_get_info_merchant(p_merchant_id):
+    global merchant_data_glb
+    merchant_data_glb = Merchant.query.get(p_merchant_id)
+    if merchant_data_glb:
+        return True
+    else:
+        return False
+
 def fn_add_merchant(p_add_merchant):
     '''Function to add new Merchant'''
     if not fn_chk_merchant_exist(p_id_merchant=p_add_merchant.id_merchant,p_merchant_name=p_add_merchant.merchant_name):
@@ -114,26 +152,38 @@ def fn_chk_merchant_exist(p_id_merchant,p_merchant_name):
         else:
             return False
 
-def fn_get_countries():
+def fn_get_countries(p_id_country):
     '''Function to get list countries'''
     country_list.clear()
-    all_countries = country.query.all()
-    for i in range(len(all_countries)):
-        country_list.append((all_countries[i].id_country, all_countries[i].desc_country))
+    if not p_id_country:
+        all_countries = country.query.all()
+        for i in range(len(all_countries)):
+            country_list.append((all_countries[i].id_country, all_countries[i].desc_country))
+    else:
+        all_countries =country.query.get(p_id_country)
+        country_list.append((all_countries.id_country, all_countries.desc_country))
 
-def fn_get_states(p_idcountry):
+def fn_get_states(p_idcountry,p_idstate):
     '''Function to get list states for the country'''
     state_list.clear()
-    all_states = state.query.filter(state.id_country == p_idcountry).all()
-    for i in range(len(all_states)):
-        state_list.append((all_states[i].id_state, all_states[i].desc_state))
+    if not p_idstate:
+        all_states = state.query.filter(state.id_country == p_idcountry).all()
+        for i in range(len(all_states)):
+            state_list.append((all_states[i].id_state, all_states[i].desc_state))
+    else :
+        all_states = state.query.filter(state.id_country == p_idcountry, state.id_state==p_idstate).all()
+        state_list.append((all_states[0].id_state, all_states[0].desc_state))
 
-def fn_get_cities(p_idcountry,p_idstate):
+def fn_get_cities(p_idcountry,p_idstate,p_idcity):
     '''Function to get list city for the country/state'''
     city_list.clear()
-    all_cities = city.query.filter(city.id_country == p_idcountry, city.id_state == p_idstate).all()
-    for i in range(len(all_cities)):
-        city_list.append((all_cities[i].id_city, all_cities[i].desc_city))
+    if not p_idcity :
+        all_cities = city.query.filter(city.id_country == p_idcountry, city.id_state == p_idstate).all()
+        for i in range(len(all_cities)):
+            city_list.append((all_cities[i].id_city, all_cities[i].desc_city))
+    else :
+        all_cities = city.query.filter(city.id_country == p_idcountry, city.id_state == p_idstate, city.id_city == p_idcity).all()
+        city_list.append((all_cities[0].id_city, all_cities[0].desc_city))
 
 def fn_delete_eqpinc(p_serial_number):
     #if fn_chk_eqp_exist(p_serial_number=p_serial_number):
@@ -374,9 +424,6 @@ def fn_get_show_inveqp():
 
 @app.route('/fn_Del_Serialeqp',methods=['GET','POST'])
 def fn_DelEqpInv():
-    # fn_get_all_marcaeqp(p_filter=1)
-    # fn_get_all_modeleqp(p_filter=1)
-    # fn_get_all_statuseqp(p_filter=1)
     global email_user_glb,serial_number_glb
     form =GetSerialEqp()
     form_confirm = Confirmform()
@@ -453,9 +500,9 @@ def fn_DelEqpInv():
 
 @app.route('/fn_RegNewMerchant',methods=['GET','POST'])
 def fn_RegNewMerchant():
-    fn_get_countries()
-    fn_get_states(p_idcountry=1)
-    fn_get_cities(p_idcountry=1,p_idstate=1)
+    fn_get_countries(p_id_country=None)
+    fn_get_states(p_idcountry=1,p_idstate=None)
+    fn_get_cities(p_idcountry=1,p_idstate=1,p_idcity=None)
     form = MerchantAddForm()
     if request.method == 'GET':
         return render_template(template_name_or_list='index.html'
@@ -476,7 +523,7 @@ def fn_RegNewMerchant():
             if fn_add_merchant(new_merchant_add):
                 flask.flash('El merchant ha sido resgistrado correctamente')
             else:
-                flask.flash('Error al registrar la información del merchant')
+                flask.flash('Error al registrar la información, el merchant ya existe')
             return redirect(url_for('fn_RegNewMerchant'))
         else :
             return render_template(template_name_or_list='index.html'
@@ -486,9 +533,57 @@ def fn_RegNewMerchant():
                                    , form               =form
                                    )
 
+@app.route('/fn_ManageMerchant',methods=['GET','POST'])
+def fn_ManageMerchant():
+    global merchant_data_glb,country_list,state_list,city_list
+    # form = MerchantAddForm(id_state=25)  # Colocar un default value form = TestForm(test_field=1)
+    form = MerchantSelectform()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            form1 = MerchantMangeForm()
+            if form.submit.data :
+                if fn_get_info_merchant(p_merchant_id=form.id_merchant.data):
+                    form1 = MerchantMangeForm(id_country=merchant_data_glb.id_country, id_state=merchant_data_glb.id_state,id_city=merchant_data_glb.id_city)
+                    form1.id_merchant.data      = merchant_data_glb.id_merchant
+                    form1.merchant_name.data    = merchant_data_glb.merchant_name
+                    form1.merchant_address.data = merchant_data_glb.merchant_address
+                    return render_template(template_name_or_list='index.html'
+                                           , flg                =6
+                                           , title_form         ='Manage the Merchants'
+                                           , email_user         =email_user_glb
+                                           , form               =form1
+                                           )
+                else:
+                    flask.flash('El merchant no existe , favor validar')
+                    return redirect(url_for('fn_ManageMerchant'))
+            elif form1.update.data:
+                update_merchant_data = Merchant( id_merchant       =form1.id_merchant.data
+                                                ,merchant_name     =form1.merchant_name.data
+                                                ,merchant_address  =form1.merchant_address.data
+                                                ,id_country        =form1.id_country.data
+                                                ,id_state          =form1.id_state.data
+                                                ,id_city           =form1.id_city.data
+                                                )
+                if fn_update_merchant(p_update_merchant=update_merchant_data):
+                    flask.flash('La información del merchant fue actualizada correctamente')
+                else:
+                    flask.flash('La información del merchant no pudo ser actualizada')
+            elif form1.delete.data:
+                if fn_delete_merchant(p_id_merchant=form1.id_merchant.data, p_merchant_name=form1.merchant_name.data):
+                     flask.flash('La información del merchant ha sido eliminada')
+                else :
+                     flask.flash('La información del merchant no pudo ser eliminada')
+
+    return render_template(template_name_or_list='index.html'
+                           , flg                =6
+                           , title_form         ='Getting Merchant Information '
+                           , email_user         =email_user_glb
+                           , form               =form
+                           )
+
 @app.route('/state/<id_country>')
 def statebycountry(id_country):
-    fn_get_states(p_idcountry=id_country)
+    fn_get_states(p_idcountry=id_country,p_idstate=None)
     stateArray = []
     for i in range(len(state_list)):
         stateObj = {}
@@ -499,7 +594,7 @@ def statebycountry(id_country):
 
 @app.route('/cities/<id_data>')
 def citiesbystate(id_data):
-    fn_get_cities(p_idcountry =id_data.split(sep='|')[0] , p_idstate=id_data.split(sep='|')[1])
+    fn_get_cities(p_idcountry =id_data.split(sep='|')[0] , p_idstate=id_data.split(sep='|')[1],p_idcity=None)
     citiesArray = []
     for i in range(len(city_list)):
         citiesObj = {}
@@ -509,4 +604,7 @@ def citiesbystate(id_data):
     return jsonify({'citiesbystate' : citiesArray})
 
 if __name__ =='__main__':
+    fn_get_countries(p_id_country=None)
+    fn_get_states(p_idcountry=1, p_idstate=None)
+    fn_get_cities(p_idcountry=1, p_idstate=1, p_idcity=None)
     app.run(debug=True,port=5001)
