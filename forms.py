@@ -73,6 +73,12 @@ class MerchantSelectform(FlaskForm):
     id_merchant = StringField('Id Merchant :', render_kw={"placeholder": "Id merchant", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=15, max=15), input_required()])
     submit = SubmitField('Select')
 
+class Installterm(FlaskForm):
+    id_merchant = StringField('Id Merchant :', render_kw={"placeholder": "Id merchant", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=15, max=15), input_required()])
+    serial_number = StringField(name='Serial number :',render_kw={"placeholder": "Número de serial", 'style': 'width: 30ch'},validators=[DataRequired(), length(min=20, max=20), input_required()])
+    submit = SubmitField('Submit')
+    cancel = SubmitField('Calcel')
+
     # @app.route('/dashboard/addname', methods=['GET', 'POST'])
     # def addname():
     #     form = AddName()

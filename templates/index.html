@@ -77,7 +77,7 @@
 								  <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
 									<li><a class="dropdown-item" href="{{ url_for('fn_RegNewMerchant') }}">Register Merchant</a></li>
 									<li><a class="dropdown-item" href="{{ url_for('fn_ManageMerchant') }}">Update & Delete Merchants</a></li>
-									<li><a class="dropdown-item" href="#">Delete Merchant</a></li>
+									<li><a class="dropdown-item" href="{{ url_for('fn_installterm')}}">Install terminal at the merchants</a></li>
 								  </ul>
 							</div>
 					</div>
@@ -157,6 +157,42 @@
 										<div class="row row2da-col2da-regneweqp">
 											{{wtf.quick_form(form, novalidate=True)}}
 										</div>
+									{% endif %}
+									{% if flg ==7: %}
+											{% with messages = get_flashed_messages() %}
+												{% if messages %}
+													{% for message in messages  %}
+														<p style="color: #D21312;"> {{ message }} </p>
+													{% endfor %}
+												{% endif %}
+											{% endwith %}
+										<div class="row row2da-col2da-regneweqp">
+											{{wtf.quick_form(form, novalidate=True)}}
+										</div>
+										<table class="table table-hover table-dark">
+										  <thead>
+											<tr>
+											  <th scope="col">#</th>
+											  <th scope="col">id merchant</th>
+											  <th scope="col">Serial number</th>
+												<th scope="col">Marca</th>
+												<th scope="col">Modelo</th>
+											  <th scope="col">Status</th>
+											</tr>
+										  </thead>
+										  <tbody>
+											{% for idx in range(0,tbl_eqp_intalled|length,1): %}
+												  <tr>
+													  <th scope="row">1</th>
+													  <td>{{ tbl_eqp_intalled[idx].store_id }}</td>
+													  <td>{{ tbl_eqp_intalled[idx].serial_number }}</td>
+													  <td>{{ tbl_eqp_intalled[idx].desc_marca }}</td>
+													  <td>{{ tbl_eqp_intalled[idx].desc_model }}</td>
+													  <td>{{ tbl_eqp_intalled[idx].desc_status }}</td>
+												  </tr>
+										  	{% endfor %}
+										  </tbody>
+										</table>
 									{% endif %}
 					</div>
 				  </div>

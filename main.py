@@ -3,7 +3,7 @@ from flask import Flask, render_template,redirect,url_for, flash, request,jsonif
 from flask_login import UserMixin,login_user,LoginManager,current_user,logout_user
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
-from forms import LoginForm, RegisterForm, RegisterNewEqp,FilterTblEqp,GetSerialEqp,Confirmform,MerchantAddForm,MerchantMangeForm,MerchantSelectform
+from forms import LoginForm, RegisterForm, RegisterNewEqp,FilterTblEqp,GetSerialEqp,Confirmform,MerchantAddForm,MerchantMangeForm,MerchantSelectform, Installterm
 from forms import marca_eqp_list,model_eqp_list,status_eqp_list, country_list,state_list,city_list
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -96,11 +96,23 @@ class Merchant(db.Model, UserMixin):
     id_city          = db.Column(db.Integer, primary_key=False)
 
 # Funciones generales del aplicativo
+def fn_install_eqp_merchant(p_serial_number,p_id_merchant):
+    if fn_chk_merchant_exist(p_id_merchant=p_id_merchant, p_merchant_name=None):
+        update_inveqp =InventoryEqp.query.get(p_serial_number)
+        if update_inveqp :
+            update_inveqp.store_id  =p_id_merchant
+            update_inveqp.id_status = 1 # Equipo Instalado
+            db.session.commit()
+            return True
+        else:
+            return False
+    else:
+        return False
+
 def fn_update_merchant(p_update_merchant):
+    '''Function to update Merchant information'''
     global merchant_data_glb
-    #if fn_chk_merchant_exist(p_id_merchant=p_update_merchant.id_merchant,p_merchant_name=p_update_merchant.merchant_name):
     merchant_data_glb = Merchant.query.get(p_update_merchant.id_merchant)
-    print(p_update_merchant.id_merchant,p_update_merchant.merchant_name)
     if merchant_data_glb :
        merchant_data_glb.merchant_name     =p_update_merchant.merchant_name
        merchant_data_glb.merchant_address  =p_update_merchant.merchant_address
@@ -111,10 +123,9 @@ def fn_update_merchant(p_update_merchant):
        return True
     else:
         return False
-    #else :
-        #return False
 
 def fn_delete_merchant(p_id_merchant,p_merchant_name):
+    '''Function to delete merchant information'''
     global merchant_data_glb
     if fn_chk_merchant_exist(p_id_merchant=p_id_merchant,p_merchant_name=p_merchant_name):
         merchant_data_glb = Merchant.query.get(p_id_merchant)
@@ -126,6 +137,7 @@ def fn_delete_merchant(p_id_merchant,p_merchant_name):
         return False
 
 def fn_get_info_merchant(p_merchant_id):
+    '''Function for getting merchant information'''
     global merchant_data_glb
     merchant_data_glb = Merchant.query.get(p_merchant_id)
     if merchant_data_glb:
@@ -195,11 +207,11 @@ def fn_delete_eqpinc(p_serial_number):
 def fn_get_info_eqp(p_serial_number):
     return InventoryEqp_vw.query.filter(InventoryEqp_vw.serial_number==p_serial_number).all()
 
-def fn_get_all_inveqp(p_filter,p_filter_data):
+def fn_get_all_inveqp(p_filter,p_filter_data,p_id_merchant):
     '''Función que retorna el listado del inventario de equipos'''
     if p_filter == 0 :
         return InventoryEqp_vw.query.all()
-    else :
+    elif p_filter == 1 :
         if p_filter_data[0] !=0 and p_filter_data[1] !=0 and p_filter_data[2] !=0: # Marca, Model, Status
             print('Marca,Modelo,Status')
             return  InventoryEqp_vw.query.filter(InventoryEqp_vw.id_marca==p_filter_data[0],InventoryEqp_vw.id_model==p_filter_data[1],InventoryEqp_vw.id_status==p_filter_data[2]).all()
@@ -222,6 +234,8 @@ def fn_get_all_inveqp(p_filter,p_filter_data):
         else : # Status
             print('Status')
             return InventoryEqp_vw.query.filter(InventoryEqp_vw.id_status==p_filter_data[2]).all()
+    else : #p_filter == 2
+        return InventoryEqp_vw.query.filter(InventoryEqp_vw.store_id == p_id_merchant).all()
 
 def fn_chk_eqp_exist(p_serial_number):
     '''Function to check if the equipment exist'''
@@ -405,13 +419,13 @@ def fn_get_show_inveqp():
     form_filter =FilterTblEqp()
     tbl_header_list =('Nro. Serial','Stored Id','Store name','Marca','Modelo','Status')
     if request.method == 'GET':
-        tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0,p_filter_data=(0,0,0))
+        tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0,p_filter_data=(0,0,0),p_id_merchant=None)
     else:
         filter_data =(int(form_filter.marca_eqp.data),int(form_filter.model_eqp.data),int(form_filter.status_eqp.data))
         if filter_data ==(0,0,0) :
-            tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0, p_filter_data=filter_data)
+            tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=0, p_filter_data=filter_data,p_id_merchant=None)
         else:
-            tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=1,p_filter_data=filter_data)
+            tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=1,p_filter_data=filter_data,p_id_merchant=None)
 
     return render_template(template_name_or_list   ='index.html'
                            ,flg                    =3
@@ -579,6 +593,25 @@ def fn_ManageMerchant():
                            , title_form         ='Getting Merchant Information '
                            , email_user         =email_user_glb
                            , form               =form
+                           )
+@app.route('/fn_installterm',methods=['GET','POST'])
+def fn_installterm():
+    global tbl_all_inventory_eqp_list
+    tbl_all_inventory_eqp_list =[]
+    form =Installterm()
+    if request.method =='POST':
+        if fn_install_eqp_merchant(p_serial_number=form.serial_number.data,p_id_merchant=form.id_merchant.data):
+            flask.flash('El equipo fue instalado correctamente en el Merchant')
+            tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=2, p_filter_data=(0, 0, 0),p_id_merchant=form.id_merchant.data)
+        else:
+            flask.flash('El equipo no pudo ser instalado en el Merchant')
+
+    return render_template(template_name_or_list='index.html'
+                           , flg                =7
+                           , title_form         ='Installing terminal at the Merchants '
+                           , email_user         =email_user_glb
+                           , form               =form
+                           , tbl_eqp_intalled   =tbl_all_inventory_eqp_list
                            )
 
 @app.route('/state/<id_country>')
