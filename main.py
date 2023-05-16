@@ -601,12 +601,21 @@ def fn_installterm():
     tbl_header_tbl_list = ['#','Id merchant','Serial number','Marca','Modelo','Status']
     form =Installterm()
     if request.method =='POST':
-        if form.validate_on_submit():
-            if fn_install_eqp_merchant(p_serial_number=form.serial_number.data,p_id_merchant=form.id_merchant.data):
-                flask.flash('El equipo fue instalado correctamente en el Merchant')
-                tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=2, p_filter_data=(0, 0, 0),p_id_merchant=form.id_merchant.data)
-            else:
-                flask.flash('El equipo no pudo ser instalado en el Merchant')
+        if form.cancel.data :
+            pass
+            # return render_template(template_name_or_list='index.html'
+            #                        , flg=0
+            #                        #, title_form='Main page '
+            #                        , email_user=email_user_glb
+            #                        )
+        else:
+            if form.validate_on_submit():
+                if form.submit.data :
+                    if fn_install_eqp_merchant(p_serial_number=form.serial_number.data,p_id_merchant=form.id_merchant.data):
+                        flask.flash('El equipo fue instalado correctamente en el Merchant')
+                        tbl_all_inventory_eqp_list = fn_get_all_inveqp(p_filter=2, p_filter_data=(0, 0, 0),p_id_merchant=form.id_merchant.data)
+                    else:
+                        flask.flash('El equipo no pudo ser instalado en el Merchant')
 
     return render_template(template_name_or_list='index.html'
                            , flg                =7
