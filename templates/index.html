@@ -170,17 +170,17 @@
 											{{wtf.quick_form(form, novalidate=True)}}
 										</div>
 										<table class="table table-hover table-dark">
-										  <thead>
+										  <thead style="color: white;font-weight: lighter;">
 											<tr>
-											  <th scope="col">#</th>
-											  <th scope="col">id merchant</th>
-											  <th scope="col">Serial number</th>
-												<th scope="col">Marca</th>
-												<th scope="col">Modelo</th>
-											  <th scope="col">Status</th>
+											  <th scope="col">{{ tbl_header_tbl_list[0] }}</th>
+											  <th scope="col">{{ tbl_header_tbl_list[1] }}</th>
+											  <th scope="col">{{ tbl_header_tbl_list[2] }}</th>
+											  <th scope="col">{{ tbl_header_tbl_list[3] }}</th>
+											  <th scope="col">{{ tbl_header_tbl_list[4] }}</th>
+											  <th scope="col">{{ tbl_header_tbl_list[5] }}</th>
 											</tr>
 										  </thead>
-										  <tbody>
+										  <tbody style="color: #1cb495;">
 											{% for idx in range(0,tbl_eqp_intalled|length,1): %}
 												  <tr>
 													  <th scope="row">1</th>

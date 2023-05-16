@@ -62,3 +62,5 @@ a{
     color: #3A98B9;
     text-decoration: none;
 }
+
+tr:hover {background-color: blue;}
