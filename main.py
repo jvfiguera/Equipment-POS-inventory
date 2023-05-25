@@ -649,7 +649,7 @@ def citiesbystate(id_data):
     return jsonify({'citiesbystate' : citiesArray})
 
 if __name__ =='__main__':
-    fn_get_countries(p_id_country=None)
-    fn_get_states(p_idcountry=1, p_idstate=None)
-    fn_get_cities(p_idcountry=1, p_idstate=1, p_idcity=None)
+    # fn_get_countries(p_id_country=None)
+    # fn_get_states(p_idcountry=1, p_idstate=None)
+    # fn_get_cities(p_idcountry=1, p_idstate=1, p_idcity=None)
     app.run(debug=True,port=5001)
